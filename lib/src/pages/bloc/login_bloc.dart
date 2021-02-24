@@ -29,6 +29,9 @@ class LoginBLOC with Validators {
   //Stream para ver cuando ambos tienen data
   Stream<bool> get formValidStream =>
       CombineLatestStream.combine2(emailStream, passwordStream, (e, p) => true);
+  //Obtener el último valor ingresado streams con el behaviorsubject
+  String get email => _emailController.value;
+  String get password => _passwordController.value;
 
   //cerrarlos cuando no los necesito
   dispose() {

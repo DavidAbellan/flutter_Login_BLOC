@@ -127,8 +127,15 @@ Widget _crearBoton(LoginBLOC bloc) {
             child: Container(
               child: Text('Ok'),
             ),
-            onPressed: snapshot.hasData ? () {} : null);
+            onPressed: snapshot.hasData ? () => _login(bloc, context) : null);
       });
+}
+
+_login(LoginBLOC bloc, BuildContext context) {
+  print('---------------------');
+  print('Email :${bloc.email}');
+  print('Password:${bloc.password}');
+  Navigator.pushReplacementNamed(context, 'home');
 }
 
 Widget _crearFondo(BuildContext context) {
