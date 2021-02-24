@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:formvalidation/src/pages/bloc/login_bloc.dart';
+import 'package:formvalidation/src/pages/bloc/provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -17,6 +19,7 @@ class LoginPage extends StatelessWidget {
 
 Widget _loginForm(BuildContext context) {
   final size = MediaQuery.of(context).size;
+  final bloc = Provider.of(context);
 
   return SingleChildScrollView(
     child: Column(
@@ -35,11 +38,11 @@ Widget _loginForm(BuildContext context) {
                 SizedBox(
                   height: 30.0,
                 ),
-                _crearEmail(),
+                _crearEmail(bloc),
                 SizedBox(height: 30.0),
-                _crearPassword(),
+                _crearPassword(bloc),
                 SizedBox(height: 30.0),
-                _crearBoton()
+                _crearBoton(bloc)
               ],
             ),
             width: size.width * 0.85,
@@ -65,49 +68,67 @@ Widget _loginForm(BuildContext context) {
   );
 }
 
-Widget _crearEmail() {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 20.0),
-    child: TextField(
-      keyboardType: TextInputType.emailAddress,
-      decoration: InputDecoration(
-          icon: Icon(
-            Icons.alternate_email,
-            color: Colors.deepPurple,
+Widget _crearEmail(LoginBLOC bloc) {
+  return StreamBuilder(
+      stream: bloc.emailStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: TextField(
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+                icon: Icon(
+                  Icons.alternate_email,
+                  color: Colors.deepPurple,
+                ),
+                hintText: 'ejemplo@correo.com',
+                labelText: 'Correo Electrónico',
+                counterText: snapshot.data,
+                errorText: snapshot.error),
+            onChanged: (value) => bloc.changeEmail(value),
           ),
-          hintText: 'ejemplo@correo.com',
-          labelText: 'Correo Electrónico'),
-    ),
-  );
+        );
+      });
 }
 
-Widget _crearPassword() {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 20.0),
-    child: TextField(
-      obscureText: true,
-      decoration: InputDecoration(
-          icon: Icon(
-            Icons.lock,
-            color: Colors.deepPurple,
+Widget _crearPassword(LoginBLOC bloc) {
+  return StreamBuilder(
+      stream: bloc.passwordStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+                icon: Icon(
+                  Icons.lock,
+                  color: Colors.deepPurple,
+                ),
+                labelText: 'Contraseña',
+                counterText: snapshot.data,
+                errorText: snapshot.error),
+            onChanged: bloc.changePassword,
           ),
-          hintText: 'ejemplo@correo.com',
-          labelText: 'Contraseña'),
-    ),
-  );
+        );
+      });
 }
 
-Widget _crearBoton() {
-  return RaisedButton(
-      padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
-      elevation: 0,
-      color: Colors.deepPurple,
-      textColor: Colors.white,
-      child: Container(
-        child: Text('Ok'),
-      ),
-      onPressed: () => {});
+Widget _crearBoton(LoginBLOC bloc) {
+  return StreamBuilder(
+      stream: bloc.formValidStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return RaisedButton(
+            padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0)),
+            elevation: 0,
+            color: Colors.deepPurple,
+            textColor: Colors.white,
+            child: Container(
+              child: Text('Ok'),
+            ),
+            onPressed: snapshot.hasData ? () {} : null);
+      });
 }
 
 Widget _crearFondo(BuildContext context) {

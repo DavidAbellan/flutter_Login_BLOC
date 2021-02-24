@@ -1,9 +1,18 @@
 import 'dart:async';
 
-class LoginBLOC {
+import 'package:formvalidation/src/pages/bloc/validators.dart';
+import 'package:rxdart/rxdart.dart';
+
+//with --- mixin
+class LoginBLOC with Validators {
   //.broadcast para que se pueda escuchar en toda la aplicación
-  final _emailController = StreamController<String>.broadcast();
-  final _passwordController = StreamController<String>.broadcast();
+  /*final _emailController = StreamController<String>.broadcast();
+  final _passwordController = StreamController<String>.broadcast();*/
+  //usamos la librería rxdart que no reconoce los streamcontroller
+  //así que lo cambiamos por BehaviorSubject
+
+  final _emailController = BehaviorSubject<String>();
+  final _passwordController = BehaviorSubject<String>();
 
   //GET y SET
 
@@ -12,8 +21,14 @@ class LoginBLOC {
   Function(String) get changePassword => _passwordController.sink.add;
 
   //para poder estar escuchando el stream// recuperar datos--salida
-  Stream<String> get emailStream => _emailController.stream;
-  Stream<String> get passwordStream => _passwordController.stream;
+  Stream<String> get emailStream =>
+      _emailController.stream.transform(validarEmail);
+  Stream<String> get passwordStream =>
+      _passwordController.stream.transform(validarPassword);
+
+  //Stream para ver cuando ambos tienen data
+  Stream<bool> get formValidStream =>
+      CombineLatestStream.combine2(emailStream, passwordStream, (e, p) => true);
 
   //cerrarlos cuando no los necesito
   dispose() {
