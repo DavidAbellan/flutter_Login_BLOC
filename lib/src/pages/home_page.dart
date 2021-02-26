@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:formvalidation/src/pages/bloc/provider.dart';
+import 'package:formvalidation/src/pages/models/producto_model.dart';
+import 'package:formvalidation/src/providers/producto_provider.dart';
 
 class HomePage extends StatelessWidget {
+  final ProductosProvider productosProvider = new ProductosProvider();
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of(context);
@@ -12,8 +15,44 @@ class HomePage extends StatelessWidget {
           children: [Text('Email : ${bloc.email} ')],
         ),
       ),
-      body: Container(),
+      body: _crearListado(),
       floatingActionButton: _crearBoton(context),
+    );
+  }
+
+  Widget _crearListado() {
+    return FutureBuilder(
+        builder: (BuildContext context,
+            AsyncSnapshot<List<ProductoModel>> snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) =>
+                  _crearItem(snapshot.data[index], context),
+              itemCount: snapshot.data.length,
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+        future: productosProvider.cargarProductos());
+  }
+
+  Widget _crearItem(ProductoModel item, BuildContext context) {
+    return Dismissible(
+      onDismissed: (direccion) {
+        //borrar producto
+      },
+      key: UniqueKey(),
+      background: Container(
+        color: Colors.red,
+      ),
+      child: ListTile(
+        title: Text('${item.titulo} --- ${item.valor}'),
+        subtitle: Text(item.id),
+        onTap: () => Navigator.pushNamed(context, 'producto'),
+      ),
     );
   }
 

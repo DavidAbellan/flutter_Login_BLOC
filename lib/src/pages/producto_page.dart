@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:formvalidation/src/pages/models/producto_model.dart';
 import 'package:formvalidation/src/pages/utils/utils.dart' as utils;
+import 'package:formvalidation/src/providers/producto_provider.dart';
 
 //Para trabajar con Forms es necesario un statefulwidget
 class ProductoPage extends StatefulWidget {
@@ -11,6 +13,8 @@ class ProductoPage extends StatefulWidget {
 
 class _ProductoPageState extends State<ProductoPage> {
   final formKey = GlobalKey<FormState>();
+  final ProductosProvider productoProv = new ProductosProvider();
+  ProductoModel productoModel = new ProductoModel();
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +25,12 @@ class _ProductoPageState extends State<ProductoPage> {
           child: Form(
             key: formKey,
             child: Column(
-              children: [_crearNombre(), _crearPrecio(), _crearBoton()],
+              children: [
+                _crearNombre(),
+                _crearPrecio(),
+                _crearDisponible(),
+                _crearBoton()
+              ],
             ),
           ),
         ),
@@ -37,10 +46,25 @@ class _ProductoPageState extends State<ProductoPage> {
     );
   }
 
+  Widget _crearDisponible() {
+    return SwitchListTile(
+      value: productoModel.disponible,
+      title: Text('Disponible'),
+      activeColor: Colors.deepPurple,
+      onChanged: (value) {
+        setState(() {
+          productoModel.disponible = value;
+        });
+      },
+    );
+  }
+
   Widget _crearNombre() {
     return TextFormField(
+      initialValue: productoModel.titulo,
       textCapitalization: TextCapitalization.sentences,
       decoration: InputDecoration(labelText: 'Producto'),
+      onSaved: (value) => productoModel.titulo = value,
       validator: (value) {
         if (value.length < 3) {
           return 'Ingrese el nombre del producto(Mínimo 3 carácteres)';
@@ -53,6 +77,8 @@ class _ProductoPageState extends State<ProductoPage> {
 
   Widget _crearPrecio() {
     return TextFormField(
+      initialValue: productoModel.valor.toString(),
+      onSaved: (value) => productoModel.valor = double.parse(value),
       keyboardType: TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(labelText: 'Precio'),
       validator: (value) {
@@ -81,6 +107,10 @@ class _ProductoPageState extends State<ProductoPage> {
   }
 
   void _submit() {
+    print(productoModel.titulo);
+    print(productoModel.valor);
     if (!formKey.currentState.validate()) return;
+    formKey.currentState.save();
+    productoProv.crearProducto(productoModel);
   }
 }
