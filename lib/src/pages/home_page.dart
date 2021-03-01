@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
   Widget _crearItem(ProductoModel item, BuildContext context) {
     return Dismissible(
       onDismissed: (direccion) {
-        //borrar producto
+        productosProvider.borrarProducto(item.id);
       },
       key: UniqueKey(),
       background: Container(
@@ -51,7 +51,7 @@ class HomePage extends StatelessWidget {
       child: ListTile(
         title: Text('${item.titulo} --- ${item.valor}'),
         subtitle: Text(item.id),
-        onTap: () => Navigator.pushNamed(context, 'producto'),
+        onTap: () => Navigator.pushNamed(context, 'producto', arguments: item),
       ),
     );
   }

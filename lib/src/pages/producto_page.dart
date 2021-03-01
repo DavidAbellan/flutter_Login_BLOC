@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:formvalidation/src/pages/models/producto_model.dart';
 import 'package:formvalidation/src/pages/utils/utils.dart' as utils;
 import 'package:formvalidation/src/providers/producto_provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 //Para trabajar con Forms es necesario un statefulwidget
 class ProductoPage extends StatefulWidget {
@@ -13,12 +16,24 @@ class ProductoPage extends StatefulWidget {
 
 class _ProductoPageState extends State<ProductoPage> {
   final formKey = GlobalKey<FormState>();
+  //referencia al Scaffold
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
   final ProductosProvider productoProv = new ProductosProvider();
   ProductoModel productoModel = new ProductoModel();
-
+  File foto;
+  //para controlar que no se guarde el artículo dos veces
+  bool _guardando = false;
   @override
   Widget build(BuildContext context) {
+    //prodData para ver si venimos de clickar un producto o al
+    //boton nuevo
+    final ProductoModel prodData = ModalRoute.of(context).settings.arguments;
+    if (prodData != null) {
+      productoModel = prodData;
+    }
     return Scaffold(
+      key: scaffoldKey,
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(15.0),
@@ -26,6 +41,7 @@ class _ProductoPageState extends State<ProductoPage> {
             key: formKey,
             child: Column(
               children: [
+                _mostrarFoto(),
                 _crearNombre(),
                 _crearPrecio(),
                 _crearDisponible(),
@@ -39,8 +55,13 @@ class _ProductoPageState extends State<ProductoPage> {
         title: Text('Producto'),
         actions: [
           IconButton(
-              icon: Icon(Icons.photo_size_select_actual), onPressed: () {}),
-          IconButton(icon: Icon(Icons.camera_alt), onPressed: () {})
+            icon: Icon(Icons.photo_size_select_actual),
+            onPressed: _seleccionarFoto,
+          ),
+          IconButton(
+            icon: Icon(Icons.camera_alt),
+            onPressed: _tomarFoto,
+          )
         ],
       ),
     );
@@ -100,17 +121,72 @@ class _ProductoPageState extends State<ProductoPage> {
       textColor: Colors.white,
       icon: Icon(Icons.save),
       onPressed: () {
-        _submit();
+        (_guardando) ? null : _submit();
       },
       label: Text('Guardar'),
     );
   }
 
   void _submit() {
-    print(productoModel.titulo);
-    print(productoModel.valor);
     if (!formKey.currentState.validate()) return;
     formKey.currentState.save();
-    productoProv.crearProducto(productoModel);
+    setState(() {
+      _guardando = true;
+    });
+    if (productoModel.id == null) {
+      //productoModel.id = 'pm' + productoModel.titulo.trim() + 1980.toString();
+      productoProv.crearProducto(productoModel);
+    } else {
+      productoProv.modificarProducto(productoModel);
+    }
+    setState(() {
+      _guardando = false;
+    });
+    mostrarSnackbar('Registro guardado');
+    Navigator.pop(context);
+  }
+
+  void mostrarSnackbar(String mensaje) {
+    final SnackBar sanckbar = SnackBar(
+        content: Text(mensaje), duration: Duration(milliseconds: 1500));
+
+    //necesito la referencia al scaffold
+
+    scaffoldKey.currentState.showSnackBar(sanckbar);
+  }
+
+  _mostrarFoto() {
+    if (productoModel.photo != null) {
+      return FadeInImage(
+        image: NetworkImage(productoModel.photo),
+        placeholder: AssetImage('assets/jar-loading.gif'),
+        height: 300.0,
+        fit: BoxFit.contain,
+      );
+    } else {
+      return Image(
+        image: AssetImage(foto?.path ?? 'assets/no-image.png'),
+        height: 300.0,
+        fit: BoxFit.cover,
+      );
+    }
+  }
+
+  _seleccionarFoto() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.getImage(
+        source: ImageSource.gallery); //pickImage(source: ImageSource.gallery);
+    if (foto != null) {}
+    foto = File(pickedFile.path);
+    setState(() {});
+  }
+
+  _tomarFoto() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.getImage(
+        source: ImageSource.camera); //pickImage(source: ImageSource.gallery);
+    if (foto != null) {}
+    foto = File(pickedFile.path);
+    setState(() {});
   }
 }
