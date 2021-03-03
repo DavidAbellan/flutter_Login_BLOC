@@ -127,21 +127,22 @@ class _ProductoPageState extends State<ProductoPage> {
     );
   }
 
-  void _submit() {
+  void _submit() async {
     if (!formKey.currentState.validate()) return;
     formKey.currentState.save();
     setState(() {
       _guardando = true;
     });
+    if (foto != null) {
+      productoModel.photo = await productoProv.subirImagen(foto);
+    }
     if (productoModel.id == null) {
       //productoModel.id = 'pm' + productoModel.titulo.trim() + 1980.toString();
       productoProv.crearProducto(productoModel);
     } else {
       productoProv.modificarProducto(productoModel);
     }
-    setState(() {
-      _guardando = false;
-    });
+
     mostrarSnackbar('Registro guardado');
     Navigator.pop(context);
   }
@@ -173,20 +174,25 @@ class _ProductoPageState extends State<ProductoPage> {
   }
 
   _seleccionarFoto() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.getImage(
-        source: ImageSource.gallery); //pickImage(source: ImageSource.gallery);
-    if (foto != null) {}
-    foto = File(pickedFile.path);
-    setState(() {});
+    _procesarImagen(ImageSource.gallery);
   }
 
   _tomarFoto() async {
+    _procesarImagen(ImageSource.camera);
+  }
+
+  _procesarImagen(ImageSource origen) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.getImage(
-        source: ImageSource.camera); //pickImage(source: ImageSource.gallery);
-    if (foto != null) {}
+    final pickedFile = await picker.getImage(source: origen, imageQuality: 80);
+
+    /*usar flutter image compres
+    https://pub.dev/packages/flutter_image_compress*/
     foto = File(pickedFile.path);
+
+    if (foto != null) {
+      productoModel.photo = null;
+    }
+
     setState(() {});
   }
 }

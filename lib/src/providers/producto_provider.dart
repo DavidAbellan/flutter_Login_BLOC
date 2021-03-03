@@ -1,7 +1,9 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'package:http_parser/http_parser.dart';
 import 'package:formvalidation/src/pages/models/producto_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:mime_type/mime_type.dart';
 
 class ProductosProvider {
   final List<ProductoModel> productosFormatted = new List();
@@ -51,5 +53,33 @@ class ProductosProvider {
       productosFormatted.add(temp);
     });
     return productosFormatted;
+  }
+
+  Future<String> subirImagen(File imagen) async {
+    final url = Uri.parse(
+        'https://api.cloudinary.com/v1_1/dsvuhzcsh/image/upload?upload_preset=dkgxklls');
+    final mimeType = mime(imagen.path).split('/');
+    final uploadRequest = http.MultipartRequest('POST', url);
+
+    final file = await http.MultipartFile.fromPath(
+      'file',
+      imagen.path,
+      contentType: MediaType(mimeType[0], mimeType[1]),
+    );
+    uploadRequest.files.add(file);
+
+    final http.StreamedResponse streamResponse = await uploadRequest.send();
+    final resp = await http.Response.fromStream(streamResponse);
+    /* if (resp.statusCode != 200 && resp.statusCode != 201) {
+      print('Error en la petición request');
+      print(resp.body);
+      return null;
+    }*/
+
+    final responseData = json.decode(resp.body);
+    print(responseData);
+
+    ///particularidades de cloudDinary
+    return responseData['secure_url'];
   }
 }

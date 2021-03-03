@@ -41,19 +41,34 @@ class HomePage extends StatelessWidget {
 
   Widget _crearItem(ProductoModel item, BuildContext context) {
     return Dismissible(
-      onDismissed: (direccion) {
-        productosProvider.borrarProducto(item.id);
-      },
-      key: UniqueKey(),
-      background: Container(
-        color: Colors.red,
-      ),
-      child: ListTile(
-        title: Text('${item.titulo} --- ${item.valor}'),
-        subtitle: Text(item.id),
-        onTap: () => Navigator.pushNamed(context, 'producto', arguments: item),
-      ),
-    );
+        onDismissed: (direccion) {
+          productosProvider.borrarProducto(item.id);
+        },
+        key: UniqueKey(),
+        background: Container(
+          color: Colors.red,
+        ),
+        child: Card(
+          child: Column(
+            children: <Widget>[
+              (item.photo == null)
+                  ? Image(image: AssetImage('assets/no-image.png'))
+                  : FadeInImage(
+                      image: NetworkImage(item.photo),
+                      placeholder: AssetImage('assets/jar-loading.gif'),
+                      height: 300,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+              ListTile(
+                title: Text('${item.titulo} --- ${item.valor}'),
+                subtitle: Text(item.id),
+                onTap: () =>
+                    Navigator.pushNamed(context, 'producto', arguments: item),
+              ),
+            ],
+          ),
+        ));
   }
 
   _crearBoton(BuildContext context) {
