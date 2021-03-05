@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:formvalidation/src/pages/models/producto_model.dart';
 import 'package:formvalidation/src/pages/utils/utils.dart' as utils;
 import 'package:formvalidation/src/providers/producto_provider.dart';
@@ -165,12 +167,15 @@ class _ProductoPageState extends State<ProductoPage> {
         fit: BoxFit.contain,
       );
     } else {
-      return Image(
-        image: AssetImage(foto?.path ?? 'assets/no-image.png'),
-        height: 300.0,
-        fit: BoxFit.cover,
-      );
+      if (foto != null) {
+        return Image.file(
+          foto,
+          height: 300.0,
+          fit: BoxFit.cover,
+        );
+      }
     }
+    return Image.asset('assets/no-image.png');
   }
 
   _seleccionarFoto() async {

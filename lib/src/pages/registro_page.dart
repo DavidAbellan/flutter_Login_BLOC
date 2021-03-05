@@ -3,9 +3,9 @@ import 'package:formvalidation/src/pages/bloc/login_bloc.dart';
 import 'package:formvalidation/src/pages/bloc/provider.dart';
 import 'package:formvalidation/src/providers/usuario_provider.dart';
 
-final usuarioProvider = new UsuarioProvider();
+final userProvider = new UsuarioProvider();
 
-class LoginPage extends StatelessWidget {
+class RegistroPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +35,7 @@ Widget _loginForm(BuildContext context) {
             child: Column(
               children: [
                 Text(
-                  'Log In',
+                  'Sign Up',
                   style: TextStyle(fontSize: 20.0),
                 ),
                 SizedBox(
@@ -63,8 +63,8 @@ Widget _loginForm(BuildContext context) {
               ],
             )),
         FlatButton(
-          child: Text('Crear una nueva cuenta'),
-          onPressed: () => Navigator.pushReplacementNamed(context, 'registro'),
+          child: Text('Ya tengo cuenta'),
+          onPressed: () => Navigator.pushReplacementNamed(context, 'login'),
         ),
         SizedBox(
           height: 100.0,
@@ -133,15 +133,17 @@ Widget _crearBoton(LoginBLOC bloc) {
             child: Container(
               child: Text('Ok'),
             ),
-            onPressed: snapshot.hasData ? () => _login(bloc, context) : null);
+            onPressed:
+                snapshot.hasData ? () => _register(bloc, context) : null);
       });
 }
 
-_login(LoginBLOC bloc, BuildContext context) {
+_register(LoginBLOC bloc, BuildContext context) {
   print(bloc.email);
   print(bloc.password);
-  usuarioProvider.login(bloc.email, bloc.password);
-  // Navigator.pushReplacementNamed(context, 'home');
+  userProvider.nuevoUsuario(bloc.email, bloc.password);
+
+  //Navigator.pushReplacementNamed(context, 'home');
 }
 
 Widget _crearFondo(BuildContext context) {
