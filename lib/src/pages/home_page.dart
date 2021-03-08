@@ -4,9 +4,13 @@ import 'package:formvalidation/src/pages/models/producto_model.dart';
 import 'package:formvalidation/src/providers/producto_provider.dart';
 
 class HomePage extends StatelessWidget {
-  final ProductosProvider productosProvider = new ProductosProvider();
+  //sustituimos el productosProvider para implementar el patrón BLOC
+
+  //final ProductosProvider productosProvider = new ProductosProvider();
   @override
   Widget build(BuildContext context) {
+    final productosBloc = Provider.productosBloc(context);
+    productosBloc.cargarProductos();
     final bloc = Provider.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -15,13 +19,31 @@ class HomePage extends StatelessWidget {
           children: [Text('Email : ${bloc.email} ')],
         ),
       ),
-      body: _crearListado(),
+      body: _crearListado(productosBloc),
       floatingActionButton: _crearBoton(context),
     );
   }
 
-  Widget _crearListado() {
-    return FutureBuilder(
+  Widget _crearListado(ProductosBLOC productos) {
+    return StreamBuilder(
+      stream: productos.productosStream,
+      builder:
+          (BuildContext context, AsyncSnapshot<List<ProductoModel>> snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+            itemBuilder: (BuildContext context, int index) =>
+                _crearItem(snapshot.data[index], context, productos),
+            itemCount: snapshot.data.length,
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
+
+    /* return FutureBuilder(
         builder: (BuildContext context,
             AsyncSnapshot<List<ProductoModel>> snapshot) {
           if (snapshot.hasData) {
@@ -36,13 +58,14 @@ class HomePage extends StatelessWidget {
             );
           }
         },
-        future: productosProvider.cargarProductos());
+        future: productosProvider.cargarProductos());*/
   }
 
-  Widget _crearItem(ProductoModel item, BuildContext context) {
+  Widget _crearItem(
+      ProductoModel item, BuildContext context, ProductosBLOC productosBloc) {
     return Dismissible(
         onDismissed: (direccion) {
-          productosProvider.borrarProducto(item.id);
+          productosBloc.borrarProducto(item.id);
         },
         key: UniqueKey(),
         background: Container(

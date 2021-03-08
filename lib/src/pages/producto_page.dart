@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:formvalidation/src/pages/bloc/productos_bloc.dart';
+import 'package:formvalidation/src/pages/bloc/provider.dart';
 import 'package:formvalidation/src/pages/models/producto_model.dart';
 import 'package:formvalidation/src/pages/utils/utils.dart' as utils;
-import 'package:formvalidation/src/providers/producto_provider.dart';
 import 'package:image_picker/image_picker.dart';
 
 //Para trabajar con Forms es necesario un statefulwidget
@@ -21,7 +21,8 @@ class _ProductoPageState extends State<ProductoPage> {
   //referencia al Scaffold
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final ProductosProvider productoProv = new ProductosProvider();
+  ProductosBLOC productosBloc;
+  //final ProductosProvider productoProv = new ProductosProvider();
   ProductoModel productoModel = new ProductoModel();
   File foto;
   //para controlar que no se guarde el artículo dos veces
@@ -30,6 +31,7 @@ class _ProductoPageState extends State<ProductoPage> {
   Widget build(BuildContext context) {
     //prodData para ver si venimos de clickar un producto o al
     //boton nuevo
+    productosBloc = Provider.productosBloc(context);
     final ProductoModel prodData = ModalRoute.of(context).settings.arguments;
     if (prodData != null) {
       productoModel = prodData;
@@ -136,13 +138,13 @@ class _ProductoPageState extends State<ProductoPage> {
       _guardando = true;
     });
     if (foto != null) {
-      productoModel.photo = await productoProv.subirImagen(foto);
+      productoModel.photo = await productosBloc.subirFoto(foto);
     }
     if (productoModel.id == null) {
       //productoModel.id = 'pm' + productoModel.titulo.trim() + 1980.toString();
-      productoProv.crearProducto(productoModel);
+      productosBloc.agregarProducto(productoModel);
     } else {
-      productoProv.modificarProducto(productoModel);
+      productosBloc.editarProducto(productoModel);
     }
 
     mostrarSnackbar('Registro guardado');
