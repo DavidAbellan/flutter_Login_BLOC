@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:formvalidation/src/pages/bloc/login_bloc.dart';
 import 'package:formvalidation/src/pages/bloc/provider.dart';
+import 'package:formvalidation/src/pages/utils/utils.dart';
 import 'package:formvalidation/src/providers/usuario_provider.dart';
 
 final userProvider = new UsuarioProvider();
@@ -138,11 +139,15 @@ Widget _crearBoton(LoginBLOC bloc) {
       });
 }
 
-_register(LoginBLOC bloc, BuildContext context) {
-  print(bloc.email);
-  print(bloc.password);
-  userProvider.nuevoUsuario(bloc.email, bloc.password);
+_register(LoginBLOC bloc, BuildContext context) async {
+  Map info = await userProvider.login(bloc.email, bloc.password);
 
+  if (info['ok']) {
+    Navigator.pushReplacementNamed(context, 'home');
+  } else {
+    mostrarAlerta(
+        context, info['mensaje'] /*para mandar el error de FireBase*/);
+  }
   //Navigator.pushReplacementNamed(context, 'home');
 }
 
